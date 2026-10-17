@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Thiệp 20/10 – Bó hoa QR</title><style>
+:root{--bg:#fff3f6;--card:#fff;--text:#593744;--accent:#b54d72;--line:#e7c4d0;--muted:#9b7783;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#22141a;--card:#2e1c24;--text:#f6dde6;--accent:#e0709a;--line:#5a3745;--muted:#c49aab}}
+:root[data-theme="dark"]{--bg:#22141a;--card:#2e1c24;--text:#f6dde6;--accent:#e0709a;--line:#5a3745;--muted:#c49aab}
+*{box-sizing:border-box}body{margin:0;padding:20px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.box{max-width:560px;margin:0 auto;background:var(--card);border-radius:24px;padding:26px;box-shadow:0 15px 50px #9e45641a}
+h1{font-family:Georgia,serif;font-weight:500;color:var(--accent);margin:0 0 8px}p{line-height:1.6}
+label{display:block;font-weight:700;margin-top:12px}
+input,textarea{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;font:inherit;margin:6px 0 4px;background:transparent;color:var(--text)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:99px;background:var(--accent);color:#fff;padding:13px 20px;font:inherit;font-weight:700;cursor:pointer}
+button.alt{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+canvas{width:100%;height:auto;border-radius:16px;margin-top:20px;display:none;box-shadow:0 8px 30px #0002}
+small{color:var(--muted)}
+</style></head><body><main class="box">
+<h1>Thiệp 20/10 💐 bó hoa QR</h1>
+<p>Dán link trang thiệp, công cụ sẽ vẽ một tấm thiệp có bó hoa, trong đó mã QR nằm ngay giữa bông hoa. Bạn tải ảnh về để gửi hoặc in.</p>
+<label for="url">Đường link (sẽ nằm trong mã QR)</label>
+<input id="url" type="url" placeholder="https://ten-cua-ban.github.io/thiep-20-10/">
+<label for="name">Gửi tặng (không bắt buộc)</label>
+<input id="name" type="text" placeholder="Mẹ yêu / Cô Lan / Chị Hương…">
+<label for="msg">Lời chúc</label>
+<textarea id="msg" rows="3">Chúc bạn luôn xinh đẹp, hạnh phúc và tràn đầy niềm vui!</textarea>
+<div class="row"><button id="make">Tạo thiệp</button><button id="dl" class="alt" hidden>Tải ảnh PNG</button></div>
+<canvas id="c" width="1080" height="1750"></canvas>
+<p><small>Cần Internet để tải thư viện QR. Nhớ dùng điện thoại khác quét thử trước khi gửi nhé.</small></p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),cv=$('#c'),ctx=cv.getContext('2d'),W=1080,H=1750,CX=540,CY=940;
+const SERIF='"Times New Roman",Times,"Noto Serif",serif';
+function wrap(t,max,font){ctx.font=font;const w=t.split(/\s+/),L=[];let cur='';for(const x of w){const n=cur?cur+' '+x:x;if(ctx.measureText(n).width>max&&cur){L.push(cur);cur=x}else cur=n}if(cur)L.push(cur);return L}
+function petal(a,d,len,wid,fill,stroke){ctx.save();ctx.translate(CX,CY);ctx.rotate(a);ctx.beginPath();ctx.ellipse(d,0,len/2,wid/2,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=stroke;ctx.stroke();ctx.restore()}
+function leaf(a,d,len,wid,fill){ctx.save();ctx.translate(CX,CY);ctx.rotate(a);ctx.beginPath();ctx.ellipse(d,0,len/2,wid/2,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();ctx.restore()}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function draw(text,name,msg){
+ name=name.normalize('NFC');msg=msg.normalize('NFC');
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#ffdfe9');g.addColorStop(1,'#fff7f0');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ ctx.strokeStyle='#e58aaa';ctx.lineWidth=6;rr(30,30,W-60,H-60,40);ctx.stroke();
+ ctx.strokeStyle='#f3b6cb';ctx.lineWidth=2;rr(48,48,W-96,H-96,30);ctx.stroke();
+ ctx.textAlign='center';ctx.fillStyle='#a34e6b';
+ ctx.font='italic 46px '+SERIF;ctx.fillText('Chúc mừng',CX,120);
+ ctx.font='bold 170px '+SERIF;ctx.fillStyle='#c2406f';ctx.fillText('20/10',CX,275);
+ ctx.fillStyle='#a34e6b';ctx.font='44px '+SERIF;ctx.fillText('Ngày Phụ nữ Việt Nam',CX,345);
+ let y=402;ctx.fillStyle='#7a4a5c';
+ if(name){ctx.font='bold 36px '+SERIF;ctx.fillText('Gửi tặng '+name+' ♥',CX,y);y+=44}
+ const lines=wrap(msg,820,'italic 32px '+SERIF).slice(0,2);ctx.font='italic 32px '+SERIF;lines.forEach((l,i)=>ctx.fillText(l,CX,y+i*40));
+ ctx.save();ctx.translate(0,70);
+ [[2.0,'#6bb27a'],[1.1,'#6bb27a'],[2.5,'#4f9a63'],[0.65,'#4f9a63'],[1.57,'#5aa56e']].forEach(([a,c])=>leaf(a,390,260,90,c));
+ // giấy gói
+ ctx.beginPath();ctx.moveTo(250,1190);ctx.lineTo(830,1190);ctx.lineTo(CX,1590);ctx.closePath();
+ const cg=ctx.createLinearGradient(250,1190,830,1500);cg.addColorStop(0,'#fbd3e0');cg.addColorStop(1,'#f19ab8');ctx.fillStyle=cg;ctx.fill();ctx.strokeStyle='#e07a9f';ctx.lineWidth=4;ctx.stroke();
+ ctx.beginPath();ctx.moveTo(CX,1300);ctx.lineTo(380,1190);ctx.moveTo(CX,1300);ctx.lineTo(700,1190);ctx.strokeStyle='#ffffff88';ctx.stroke();
+ // cánh hoa
+ const N=12;
+ for(let i=0;i<N;i++)petal(i*2*Math.PI/N,340,230,160,'#f48fb1','#ec6f9a');
+ for(let i=0;i<N;i++)petal((i+.5)*2*Math.PI/N,300,190,130,'#f9c2d6','#f29ab9');
+ // QR
+ const q=qrcode(0,'H');q.addData(text);q.make();const n=q.getModuleCount(),box=500,qs=396,m=Math.floor(qs/n),size=m*n;
+ ctx.save();ctx.shadowColor='#0003';ctx.shadowBlur=24;ctx.fillStyle='#fff';rr(CX-box/2,CY-box/2,box,box,36);ctx.fill();ctx.restore();
+ ctx.fillStyle='#8f2252';const ox=CX-size/2,oy=CY-size/2;
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))ctx.fillRect(ox+c*m,oy+r*m,m,m);
+ // nơ
+ ctx.fillStyle='#d6336c';ctx.strokeStyle='#a8204f';ctx.lineWidth=4;
+ [-1,1].forEach(s=>{ctx.beginPath();ctx.moveTo(CX,1400);ctx.bezierCurveTo(CX+s*130,1320,CX+s*170,1480,CX,1410);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(CX,1410);ctx.lineTo(CX+s*90,1500);ctx.lineTo(CX+s*45,1500);ctx.closePath();ctx.fill();ctx.stroke()});
+ ctx.beginPath();ctx.arc(CX,1405,24,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.restore();ctx.fillStyle='#a34e6b';ctx.font='italic 30px '+SERIF;ctx.fillText('Quét mã QR giữa bông hoa để mở thiệp',CX,1710);
+}
+$('#make').addEventListener('click',()=>{
+ const v=$('#url').value.trim();
+ if(!/^https?:\/\//i.test(v)){alert('Hãy nhập đường link bắt đầu bằng https:// nhé.');return}
+ if(!window.qrcode){alert('Chưa tải được thư viện QR. Hãy kiểm tra Internet rồi tải lại trang.');return}
+ draw(v,$('#name').value.trim(),$('#msg').value.trim()||'Chúc bạn một ngày 20/10 thật vui!');
+ cv.style.display='block';$('#dl').hidden=false;cv.scrollIntoView({behavior:'smooth'});
+});
+$('#dl').addEventListener('click',()=>{cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='thiep-20-10-hoa-qr.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)},'image/png')});
+</script></body></html>
